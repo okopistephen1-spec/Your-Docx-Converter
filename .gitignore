@@ -1,0 +1,56 @@
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+.venv/
+venv/
+env/
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+
+# Flask instance data
+instance/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Uploaded documents
+uploads/*
+!uploads/.gitkeep
+
+# Converted documents and generated files
+converted/*
+!converted/.gitkeep
+
+# Temporary files
+*.tmp
+*.temp
+*.log
+
+# Test and coverage files
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDE and editor files
+.vscode/
+.idea/
+
+# Operating system files
+.DS_Store
+Thumbs.db
+
+# Build and distribution files
+build/
+dist/
+*.egg-info/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/

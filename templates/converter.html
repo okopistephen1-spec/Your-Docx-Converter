@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Document Converter | Your-Docx-Converter</title>
+    </head>
+    <body>
+
+        <header>
+            <h1>Document Converter</h1>
+            <p>Choose what you want to do with your document.</p>
+        </header>
+
+        <main>
+
+            <section>
+                <h2>PDF to Images</h2>
+                <p>Convert PDF pages into PNG of JPG images</p>
+                
+                <form action="/convert/pdf-to-images" method="POST" enctype="multipart/form-data">
+                    <input type="file" name="pdf_file" accept=".pdf,application/pdf" required>
+                    <button type="submit">Convert to Images</button>
+                </form>
+            </section>
+
+            <section>
+                <h2>Word to PDF</h2>
+                <p>Conver a PDF document into an editable word document.</p>
+
+                <form action="/convert/pdf-to-word" method="POST" enctype="multipart/form-data">
+                    <input type="file" name="pdf_file" accept=".pdf,application/pdf" required>
+                    <button type="submit">Convert to Word</button>
+                </form>
+
+            </section>
+
+            <a href="/">Back To Home⤆</a>
+        </main>
+    </body>
+</html>
