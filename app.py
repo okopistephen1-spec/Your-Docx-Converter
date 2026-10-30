@@ -8,6 +8,7 @@ from werkzeug.utils import secure_filename
 from services.pdf_to_image import convert_pdf_to_images
 
 from services.pdf_to_word import convert_pdf_to_word
+from services.word_to_pdf import convert_word_to_pdf
 
 app = Flask(__name__)
 
@@ -116,7 +117,46 @@ def pdf_to_images():
     except Exception:
         app.logger.exception("PDF-to-Images conversion failed.")
         return "Conversion failed. Please try another PDF file.", 500
-    
+
+
+@app.route("/convert/word-to-pdf", methods=["POST"])
+def word_to_pdf():
+    uploaded_file = request.files.get("word_file")
+
+    if uploaded_file is None or uploaded_file.filename == "":
+        return "Please select a Word document.", 400
+
+    filename = secure_filename(uploaded_file.filename)
+
+    if not filename.lower().endswith((".docx", ".doc")):
+        return "Please upload a Word document.", 400
+
+    unique_id = uuid.uuid4().hex
+
+    word_path = os.path.join(
+        UPLOAD_FOLDER,
+        f"{unique_id}_{filename}"
+    )
+
+    output_folder = os.path.join(
+        CONVERTED_FOLDER,
+        unique_id
+    )
+
+    uploaded_file.save(word_path)
+
+    try:
+        pdf_path = convert_word_to_pdf(word_path, output_folder)
+
+        return send_file(
+            pdf_path,
+            as_attachment=True,
+            download_name=f"{os.path.splitext(filename)[0]}.pdf"
+        )
+
+    except Exception:
+        app.logger.exception("Word-to-PDF conversion failed.")
+        return "Conversion failed. Please try another Word document.", 500
 
 
 if __name__ == "__main__":

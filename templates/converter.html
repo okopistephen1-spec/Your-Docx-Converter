@@ -25,12 +25,23 @@
             </section>
 
             <section>
-                <h2>Word to PDF</h2>
+                <h2>PDF to Word</h2>
                 <p>Conver a PDF document into an editable word document.</p>
 
                 <form action="/convert/pdf-to-word" method="POST" enctype="multipart/form-data">
                     <input type="file" name="pdf_file" accept=".pdf,application/pdf" required>
                     <button type="submit">Convert to Word</button>
+                </form>
+
+            </section>
+
+            <section>
+                <h2>Word to PDF</h2>
+                <p>Conver a PDF document into an editable word document.</p>
+
+                <form action="/convert/word-to-pdf" method="POST" enctype="multipart/form-data">
+                    <input type="file" name="word_file" accept=".docx,.doc" required>
+                    <button type="submit">Convert to PDF</button>
                 </form>
 
             </section>
