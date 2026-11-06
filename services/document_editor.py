@@ -58,9 +58,66 @@ def read_paragraph_runs(paragraph):
     return runs
 
 def replace_text(document, old_text, new_text):
+
+    if not old_text:
+        return
+
     for paragraph in document.paragraphs:
+
+        full_text = "".join(run.text for run in paragraph.runs)
+
+        start_index = full_text.find(old_text)
+
+        if start_index == -1:
+            continue
+
+        end_index = start_index + len(old_text)
+
+        current_index = 0
+        replacement_inserted = False
+
         for run in paragraph.runs:
 
-            if old_text in run.text:
-                run.text = run.text.replace(old_text, new_text)
-                print("Found and replaced!")
+            run_start = current_index
+            run_end = current_index + len(run.text)
+
+            overlap_start = max(start_index, run_start)
+            overlap_end = min(end_index, run_end)
+
+            if overlap_start < overlap_end:
+
+                local_start = overlap_start - run_start
+                local_end = overlap_end - run_start
+
+                if not replacement_inserted:
+
+                    run.text = (
+                        run.text[:local_start]
+                        + new_text
+                        + run.text[local_end:]
+                    )
+
+                    replacement_inserted = True
+
+                else:
+
+                    run.text = (
+                        run.text[:local_start]
+                        + run.text[local_end:]
+                    )
+
+            current_index = run_end
+
+        print("Found and replaced!")
+
+
+def replace_paragraph(document, paragraph_index, new_text):
+
+    if paragraph_index < 0 or paragraph_index >= len(document.paragraphs):
+        return False
+
+    paragraph = document.paragraphs[paragraph_index]
+
+    paragraph.text = new_text
+
+    return True

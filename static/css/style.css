@@ -1,0 +1,127 @@
+* {
+    text-align: center;
+
+}
+.converter-title {
+    font-family: Georgia, 'Times New Roman', Times, serif, serif;
+    font-size: 34px;
+    color: blue;
+}
+
+header {
+    display: contents;
+    align-items: center;
+    justify-content: center;
+    font-size: larger;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.convert-btn {
+    display: inline-block;
+    background-color: rgb(68, 68, 201);
+    color: #ffffff;
+    padding: 12px 70px;
+    border-radius: 12px;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: larger;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.hero-label {
+    display: inline-block;
+    padding: 8px 20px;
+    border-radius: 12px;
+    font-size: 12px;
+    letter-spacing: 2px;
+    color: #4338CA;
+    background-color: #f1e9e9;
+    font-weight: 700
+}
+
+.status-dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    background-color: #4338CA;
+    border-radius: 50%;
+    margin-right: 8px;
+    animation: blink 1s infinite;
+}
+
+@keyframes blink {
+    0%, 100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0;
+    }
+}
+
+.little-header {
+    display: contents;
+    align-items: center;
+    justify-content: center;
+    font-size: medium;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.nav-links {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: #ffffff;
+    padding: 15px 0;
+    z-index: 1000;
+}
+
+.navbar {
+    max-width: 550px;
+    margin: auto;
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 12px 10px;
+    box-shadow: 0 -4px 20px rgba(30, 27, 75, 0.10);
+    
+}
+
+.nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    text-decoration: none;
+    color: #777777;
+    font-size: 12px;
+    font-weight: 500;
+    transition: 0.3s ease;
+}
+
+.nav-item i {
+    font-size: 22px;
+}
+
+.nav-item.active {
+    color: #4338CA;
+}
+
+.nav-item:hover {
+    color: #4338CA;
+}
+
+
+.hero-image img {
+    width: 100%;
+    max-width: 450px;
+    height: auto;
+    display: block;
+    margin: 0 auto 25px;
+}
