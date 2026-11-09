@@ -57,12 +57,30 @@ def read_paragraph_runs(paragraph):
 
     return runs
 
+def get_all_paragraphs(document):
+
+    paragraphs = []
+
+    for paragraph in document.paragraphs:
+        paragraphs.append(paragraph)
+
+    for table in document.tables:
+
+        for row in table.rows:
+
+            for cell in row.cells:
+
+                for paragraph in cell.paragraphs:
+                    paragraphs.append(paragraph)
+
+    return paragraphs
+
 def replace_text(document, old_text, new_text):
 
     if not old_text:
         return
 
-    for paragraph in document.paragraphs:
+    for paragraph in get_all_paragraphs(document):
 
         full_text = "".join(run.text for run in paragraph.runs)
 
@@ -119,5 +137,11 @@ def replace_paragraph(document, paragraph_index, new_text):
     paragraph = document.paragraphs[paragraph_index]
 
     paragraph.text = new_text
+
+    return True
+
+
+def save_document(document, output_path):
+    document.save(output_path)
 
     return True

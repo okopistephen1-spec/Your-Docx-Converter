@@ -3,13 +3,28 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
         <title>Document Converter | Your-Docx-Converter</title>
     </head>
-    <body>
+    <body class="converter-page">
 
-        <header>
-            <h1>Document Converter</h1>
-            <p>Choose what you want to do with your document.</p>
+        <header class="topbar">
+
+            <a href="/" class="brand">Your Docx</a>
+
+            <div class="topbar-actions">
+
+                <button type="button" aria-label="Notifications">
+                    <i class="bi bi-bell"></i>
+                </button>
+
+                <a href="/profile" class="profile-icon" aria-label="Profile">
+                    <i class="bi bi-person"></i>
+                </a>
+
+            </div>
+
         </header>
 
         <main>
