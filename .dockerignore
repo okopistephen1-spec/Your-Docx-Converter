@@ -1,0 +1,28 @@
+# Git files
+.git
+.gitignore
+
+# Python virtual environments
+.venv
+venv
+env
+
+# Python cache
+__pycache__
+*.py[cod]
+
+# Temporary files
+*.log
+.pytest_cache
+.coverage
+
+# Uploaded and converted documents
+uploads/
+converted/
+
+# Local development secrets
+.env
+.env.*
+
+# Editor settings
+.vscode/
