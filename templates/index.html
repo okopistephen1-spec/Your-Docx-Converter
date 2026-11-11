@@ -3,73 +3,165 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="description" content="Your-Docx-Converter helps you convert, edit, and manage documents in one place.">
         <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.2/font/bootstrap-icons.min.css">
         <title>Your-Docx-Converter</title>
     </head>
-    <body>
-        <section class="hero">
-            <br><br>
-     
-            <div class="hero-image">
-                <img
-                    src="{{ url_for('static', filename='images/doc-convert.png') }}"
-                    alt="Document conversion illustration"
->
-            </div>
-
-
-            <header>
-                <div class="hero-label">
+    <body class="home-page">
+        <div class="home-shell">
+            <header class="home-header">
+                <div class="status-pill">
                     <span class="status-dot"></span>
-                    Universal document engine
+                    <span>UNIVERSAL DOCUMENT ENGINE</span>
                 </div>
-                <h1>Your Docx <br>
-                    <span class="converter-title">Converter</span>
-                </h1>
-                <p>Convert, edit, and manage your documents in one place.</p>
+
+                <div class="topbar home-topbar">
+                    <a href="/" class="brand" aria-label="Home">
+                        <span class="brand-mark">Y</span>
+                        <span>Your-Docx-Converter</span>
+                    </a>
+
+                    <div class="topbar-actions">
+                        <button type="button" class="action-button" aria-label="Notifications">
+                            <i class="bi bi-bell"></i>
+                        </button>
+
+                        <a href="/profile" class="profile-icon" aria-label="Profile">
+                            <i class="bi bi-person"></i>
+                        </a>
+                    </div>
+                </div>
             </header>
-        </section>
 
-        <main>
-            <section class="little-header">
-                <p>Document Converter</p>
-                <p>You can convert your document to different formats.</p>
-                <a href="/converter" class="convert-btn">🖋Get Started</a>
-            </section>
-        </main>
-        <br><br>
-        <br><br>
-        <br><br>
-        <br><br>
+            <main class="home-main">
+                <section class="hero-panel">
+                    <div class="hero-copy">
+                        <p class="eyebrow">YOUR DOCUMENT WORKSPACE</p>
+                        <h1>Your Documents, Made Simple.</h1>
+                        <p class="hero-text">Convert, edit, and manage your documents in one convenient place.</p>
 
-        <footer class="footer">
-            <nav class="navbar">
-                <div class="nav-links">
+                        <div class="hero-actions">
+                            <a href="/converter" class="primary-cta">Start Converting</a>
+                            <a href="/editor" class="secondary-cta">Open Editor</a>
+                        </div>
+                    </div>
 
-                    <a href="/" class="nav-item active">
-                        <i class="bi bi-house-door"></i>
-                        <span>Home</span>
-                    </a>
+                    <div class="hero-visual" aria-hidden="true">
+                        <div class="document-tile document-tile-main">
+                            <div class="document-flag"></div>
+                            <div class="document-lines">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                            <div class="document-badge">DOC</div>
+                        </div>
 
-                    <a href="/converter" class="nav-item">
-                        <i class="bi bi-arrow-left-right"></i>
-                        <span>Convert</span>
-                    </a>
+                        <div class="convert-orbit">
+                            <i class="bi bi-arrow-left-right"></i>
+                        </div>
 
-                    <a href="/editor" class="nav-item">
-                        <i class="bi bi-pencil-square"></i>
-                        <span>Editor</span>
-                    </a>
+                        <div class="document-tile document-tile-result">
+                            <div class="document-flag document-flag-alt"></div>
+                            <div class="document-lines">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                            <div class="document-badge document-badge-alt">PDF</div>
+                        </div>
+                    </div>
+                </section>
 
-                    <a href="/profile" class="nav-item">
-                        <i class="bi bi-person-circle"></i>
-                        <span>Profile</span>
-                    </a>
+                <section class="quick-access" aria-labelledby="quick-access-title">
+                    <h2 id="quick-access-title">What Would You Like To Do?</h2>
 
-                </div>
-            </nav>
-        </footer>
+                    <div class="action-grid">
+                        <a href="/converter" class="action-card">
+                            <div class="action-icon action-icon-purple">
+                                <i class="bi bi-file-earmark-arrow-up"></i>
+                            </div>
+                            <h3>Convert Documents</h3>
+                            <p>Convert your files between supported formats.</p>
+                            <span class="action-link">Convert Now <i class="bi bi-arrow-right"></i></span>
+                        </a>
 
+                        <a href="/editor" class="action-card">
+                            <div class="action-icon action-icon-indigo">
+                                <i class="bi bi-pencil-square"></i>
+                            </div>
+                            <h3>Edit Documents</h3>
+                            <p>Open and make changes to your Word documents.</p>
+                            <span class="action-link">Open Editor <i class="bi bi-arrow-right"></i></span>
+                        </a>
+
+                        <a href="/profile" class="action-card">
+                            <div class="action-icon action-icon-lavender">
+                                <i class="bi bi-folder2-open"></i>
+                            </div>
+                            <h3>Manage Documents</h3>
+                            <p>Access and organise your document workflow.</p>
+                            <span class="action-link">Explore <i class="bi bi-arrow-right"></i></span>
+                        </a>
+                    </div>
+                </section>
+
+                <section class="trust-section" aria-labelledby="trust-title">
+                    <h2 id="trust-title">Designed for Better Document Workflows</h2>
+
+                    <div class="benefit-list">
+                        <div class="benefit-item">
+                            <span class="benefit-icon"><i class="bi bi-hand-thumbs-up"></i></span>
+                            <span>Easy to Use</span>
+                        </div>
+                        <div class="benefit-item">
+                            <span class="benefit-icon"><i class="bi bi-arrows-angle-contract"></i></span>
+                            <span>Convenient Conversion</span>
+                        </div>
+                        <div class="benefit-item">
+                            <span class="benefit-icon"><i class="bi bi-pen"></i></span>
+                            <span>Simple Document Editing</span>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="cta-card" aria-labelledby="cta-title">
+                    <div>
+                        <p class="eyebrow">GET STARTED</p>
+                        <h3 id="cta-title">Ready to Get Started?</h3>
+                    </div>
+
+                    <p>Everything you need to work with your documents is right here.</p>
+                    <a href="/converter" class="primary-cta">Start Converting</a>
+                </section>
+            </main>
+
+            <footer class="footer-nav">
+                <nav class="navbar" aria-label="Primary navigation">
+                    <div class="nav-links">
+                        <a href="/" class="nav-item active">
+                            <i class="bi bi-house-door"></i>
+                            <span>Home</span>
+                        </a>
+
+                        <a href="/converter" class="nav-item">
+                            <i class="bi bi-arrow-left-right"></i>
+                            <span>Convert</span>
+                        </a>
+
+                        <a href="/editor" class="nav-item">
+                            <i class="bi bi-pencil-square"></i>
+                            <span>Editor</span>
+                        </a>
+
+                        <a href="/profile" class="nav-item">
+                            <i class="bi bi-person-circle"></i>
+                            <span>Profile</span>
+                        </a>
+                    </div>
+                </nav>
+            </footer>
+        </div>
     </body>
 </html>

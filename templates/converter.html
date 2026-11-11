@@ -3,65 +3,249 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="description" content="Convert documents with Your-Docx-Converter.">
         <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.2/font/bootstrap-icons.min.css">
+        <script defer src="{{ url_for('static', filename='js/converter.js') }}"></script>
         <title>Document Converter | Your-Docx-Converter</title>
     </head>
     <body class="converter-page">
+        <div class="page-shell">
+            <header class="converter-header">
+                <div class="status-pill" aria-label="Universal document engine">
+                    <span class="status-dot"></span>
+                    <span>UNIVERSAL DOCUMENT ENGINE</span>
+                </div>
 
-        <header class="topbar">
+                <div class="topbar">
+                    <a href="/" class="brand" aria-label="Home">
+                        <span class="brand-mark">Y</span>
+                        <span>Your Docx</span>
+                    </a>
 
-            <a href="/" class="brand">Your Docx</a>
+                    <div class="topbar-actions">
+                        <button type="button" class="action-button" aria-label="Notifications">
+                            <i class="bi bi-bell"></i>
+                        </button>
 
-            <div class="topbar-actions">
+                        <a href="/profile" class="profile-icon" aria-label="Profile">
+                            <i class="bi bi-person"></i>
+                        </a>
+                    </div>
+                </div>
+            </header>
 
-                <button type="button" aria-label="Notifications">
-                    <i class="bi bi-bell"></i>
-                </button>
+            <main class="converter-main">
+                <section class="hero-section" aria-labelledby="converter-title">
+                    <p class="eyebrow">Professional document workflows</p>
+                    <h1 id="converter-title">Convert Your Documents</h1>
+                    <p class="hero-subtitle">Transform your files into any format instantly with pristine layout preservation.</p>
+                </section>
 
-                <a href="/profile" class="profile-icon" aria-label="Profile">
-                    <i class="bi bi-person"></i>
-                </a>
+                <section class="workspace" aria-label="Document converter workspace">
+                    <form id="converterForm" class="converter-form" action="/convert/pdf-to-word" method="POST" enctype="multipart/form-data">
+                        <div class="dropzone" id="dropzone" tabindex="0" role="button" aria-label="Browse files">
+                            <div class="dropzone-content">
+                                <div class="upload-icon">
+                                    <i class="bi bi-cloud-arrow-up"></i>
+                                </div>
 
-            </div>
+                                <p class="drop-title">Drop your document here</p>
+                                <p class="drop-subtitle">
+                                    or
+                                    <button type="button" class="inline-button" id="browseButton">browse files from your device</button>
+                                </p>
 
-        </header>
+                                <input id="fileInput" class="visually-hidden" type="file" name="pdf_file" accept=".pdf,application/pdf" required>
+                                <button type="button" class="browse-btn" id="triggerFileInput">Browse Files</button>
 
-        <main>
+                                <div class="format-badges" aria-label="Supported formats">
+                                    <span class="format-badge">PDF</span>
+                                    <span class="format-badge">DOCX</span>
+                                    <span class="format-badge">DOC</span>
+                                    <span class="format-badge">PNG</span>
+                                </div>
+                            </div>
+                        </div>
 
-            <section>
-                <h2>PDF to Images</h2>
-                <p>Convert PDF pages into PNG of JPG images</p>
-                
-                <form action="/convert/pdf-to-images" method="POST" enctype="multipart/form-data">
-                    <input type="file" name="pdf_file" accept=".pdf,application/pdf" required>
-                    <button type="submit">Convert to Images</button>
-                </form>
-            </section>
+                        <div class="selected-file" id="selectedFile" hidden>
+                            <div class="selected-file-details">
+                                <div class="file-bullet">
+                                    <i class="bi bi-file-earmark-text"></i>
+                                </div>
+                                <div>
+                                    <p class="selected-name" id="selectedName">No file selected</p>
+                                    <p class="selected-size" id="selectedSize">0 KB</p>
+                                </div>
+                            </div>
 
-            <section>
-                <h2>PDF to Word</h2>
-                <p>Conver a PDF document into an editable word document.</p>
+                            <button type="button" class="remove-file" id="removeFileButton">Remove</button>
+                        </div>
 
-                <form action="/convert/pdf-to-word" method="POST" enctype="multipart/form-data">
-                    <input type="file" name="pdf_file" accept=".pdf,application/pdf" required>
-                    <button type="submit">Convert to Word</button>
-                </form>
+                        <div class="converter-pipeline">
+                            <div class="selector-group">
+                                <label for="convertFrom">Convert From</label>
+                                <div class="select-wrap">
+                                    <i class="bi bi-file-earmark-text"></i>
+                                    <select id="convertFrom" name="convert_from">
+                                        <option value="pdf">PDF</option>
+                                        <option value="docx">DOCX</option>
+                                        <option value="doc">DOC</option>
+                                    </select>
+                                </div>
+                            </div>
 
-            </section>
+                            <button type="button" class="swap-button" id="swapFormats" aria-label="Swap conversion direction">
+                                <i class="bi bi-arrow-left-right"></i>
+                            </button>
 
-            <section>
-                <h2>Word to PDF</h2>
-                <p>Conver a PDF document into an editable word document.</p>
+                            <div class="selector-group">
+                                <label for="convertTo">Convert To</label>
+                                <div class="select-wrap">
+                                    <i class="bi bi-file-earmark-arrow-down"></i>
+                                    <select id="convertTo" name="convert_to">
+                                        <option value="docx">DOCX</option>
+                                        <option value="png">PNG</option>
+                                        <option value="pdf">PDF</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
 
-                <form action="/convert/word-to-pdf" method="POST" enctype="multipart/form-data">
-                    <input type="file" name="word_file" accept=".docx,.doc" required>
-                    <button type="submit">Convert to PDF</button>
-                </form>
+                        <div class="quick-options" aria-label="Quick conversion shortcuts">
+                            <button type="button" class="quick-pill" data-from="docx" data-to="pdf">DOCX → PDF</button>
+                            <button type="button" class="quick-pill is-active" data-from="pdf" data-to="docx">PDF → DOCX</button>
+                            <button type="button" class="quick-pill" data-from="pdf" data-to="png">PDF → PNG</button>
+                        </div>
 
-            </section>
+                        <button type="submit" class="primary-button" id="submitButton">
+                            <span class="button-content">
+                                <span class="button-icon"><i class="bi bi-arrow-repeat"></i></span>
+                                <span>Convert Document</span>
+                                <i class="bi bi-arrow-right"></i>
+                            </span>
+                        </button>
+                    </form>
+                </section>
 
-            <a href="/">Back To Home⤆</a>
-        </main>
+                <div class="metrics-row">
+                    <article class="metric-card">
+                        <span class="metric-label">Average Latency</span>
+                        <div class="metric-value-row">
+                            <strong>42s</strong>
+                            <span class="metric-badge success">Live</span>
+                        </div>
+                        <p>Typical conversion turnaround for standard documents.</p>
+                    </article>
+
+                    <article class="metric-card">
+                        <span class="metric-label">Layout Fidelity</span>
+                        <div class="metric-value-row">
+                            <strong>97%</strong>
+                            <span class="metric-badge">Verified</span>
+                        </div>
+                        <p>Priority on preserving structure, spacing, and formatting.</p>
+                    </article>
+                </div>
+
+                <article class="architecture-card">
+                    <div class="architecture-copy">
+                        <span class="section-tag">Precision Engine</span>
+                        <h2>Precision Engine Architecture</h2>
+                        <p>Focused conversion logic keeps document structure intact while preserving text flow, image alignment, and page composition.</p>
+                        <div class="status-indicator">
+                            <span class="mini-dot"></span>
+                            Engine online
+                        </div>
+                    </div>
+
+                    <div class="architecture-visual" aria-hidden="true">
+                        <div class="visual-orbit orbit-one"></div>
+                        <div class="visual-orbit orbit-two"></div>
+                        <div class="visual-pillar pillar-one"></div>
+                        <div class="visual-pillar pillar-two"></div>
+                        <div class="visual-pillar pillar-three"></div>
+                        <div class="mini-doc doc-a"></div>
+                        <div class="mini-doc doc-b"></div>
+                        <div class="mini-doc doc-c"></div>
+                    </div>
+                </article>
+
+                <section class="feature-section" aria-labelledby="feature-heading">
+                    <h2 id="feature-heading">Why professionals rely on us</h2>
+                    <div class="feature-grid">
+                        <article class="feature-card">
+                            <div class="feature-icon lavender">
+                                <i class="bi bi-speedometer2"></i>
+                            </div>
+                            <h3>Ultra-Fast Conversion</h3>
+                            <p>Move from upload to converted file with a streamlined workflow designed for modern document tasks.</p>
+                        </article>
+
+                        <article class="feature-card">
+                            <div class="feature-icon indigo">
+                                <i class="bi bi-layout-text-window-reverse"></i>
+                            </div>
+                            <h3>High-Fidelity Layout Retention</h3>
+                            <p>Keep text spacing, page structure, and formatting aligned throughout the conversion process.</p>
+                        </article>
+
+                        <article class="feature-card">
+                            <div class="feature-icon purple">
+                                <i class="bi bi-folder2-open"></i>
+                            </div>
+                            <h3>Instant Document Management</h3>
+                            <p>Work with converted files immediately and keep each task simple, organized, and efficient.</p>
+                        </article>
+                    </div>
+                </section>
+
+                <section class="security-card" aria-labelledby="security-heading">
+                    <div class="security-header">
+                        <div class="security-icon">
+                            <i class="bi bi-shield-check"></i>
+                        </div>
+                        <div>
+                            <span class="section-tag">Security</span>
+                            <h2 id="security-heading">End-to-End Privacy and Security</h2>
+                        </div>
+                    </div>
+
+                    <p>Uploaded documents are handled through the local document conversion workflow, keeping your file handling focused and straightforward.</p>
+
+                    <div class="security-pills" aria-label="Security features">
+                        <span><i class="bi bi-lock"></i> Local workflow</span>
+                        <span><i class="bi bi-file-earmark-check"></i> File aware</span>
+                        <span><i class="bi bi-shield"></i> Controlled access</span>
+                    </div>
+                </section>
+            </main>
+
+            <footer class="footer-nav">
+                <nav class="navbar" aria-label="Primary navigation">
+                    <div class="nav-links">
+                        <a href="/" class="nav-item">
+                            <i class="bi bi-house-door"></i>
+                            <span>Home</span>
+                        </a>
+
+                        <a href="/converter" class="nav-item active">
+                            <i class="bi bi-arrow-left-right"></i>
+                            <span>Convert</span>
+                        </a>
+
+                        <a href="/editor" class="nav-item">
+                            <i class="bi bi-pencil-square"></i>
+                            <span>Editor</span>
+                        </a>
+
+                        <a href="/profile" class="nav-item">
+                            <i class="bi bi-person-circle"></i>
+                            <span>Profile</span>
+                        </a>
+                    </div>
+                </nav>
+            </footer>
+        </div>
     </body>
 </html>

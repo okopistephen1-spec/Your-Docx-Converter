@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="description" content="Edit DOCX files with Your-Docx-Converter.">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/editor.css') }}">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.2/font/bootstrap-icons.min.css">
+        <script defer src="{{ url_for('static', filename='js/editor.js') }}"></script>
+        <title>Document Editor | Your-Docx-Converter</title>
+    </head>
+    <body class="editor-page">
+        <div class="editor-shell">
+            <header class="editor-header">
+                <div class="brand-block">
+                    <div class="brand-badge">Y</div>
+                    <div>
+                        <p class="brand-label">Your-Docx-Converter</p>
+                    </div>
+                </div>
+
+                <div class="editor-header-meta">
+                    <span id="documentFilename" class="document-filename">No document open</span>
+                    <span id="saveStatus" class="save-status neutral">Ready</span>
+                </div>
+
+                <div class="editor-actions">
+                    <button type="button" id="saveDocumentBtn" class="secondary-action-button">Save</button>
+                    <button type="button" id="downloadDocumentBtn" class="primary-action-button">Download</button>
+                </div>
+            </header>
+
+            <nav class="editor-topbar" aria-label="Primary navigation">
+                <div class="nav-links">
+                    <a href="/" class="nav-item">
+                        <i class="bi bi-house-door"></i>
+                        <span>Home</span>
+                    </a>
+
+                    <a href="/converter" class="nav-item">
+                        <i class="bi bi-arrow-left-right"></i>
+                        <span>Convert</span>
+                    </a>
+
+                    <a href="/editor" class="nav-item active">
+                        <i class="bi bi-pencil-square"></i>
+                        <span>Editor</span>
+                    </a>
+
+                    <a href="/profile" class="nav-item">
+                        <i class="bi bi-person-circle"></i>
+                        <span>Profile</span>
+                    </a>
+                </div>
+            </nav>
+
+            <main class="editor-main">
+                <section id="emptyState" class="empty-state">
+                    <div class="empty-card">
+                        <div class="upload-icon-wrap">
+                            <i class="bi bi-file-earmark-word"></i>
+                        </div>
+
+                        <p class="eyebrow">WORKSPACE</p>
+                        <h1>Your Document Workspace</h1>
+                        <p class="empty-description">Open a Word document and start editing its content.</p>
+
+                        <div class="empty-upload-area" id="uploadDropzone" tabindex="0" role="button" aria-label="Upload DOCX file">
+                            <div class="upload-drop-inner">
+                                <i class="bi bi-cloud-arrow-up"></i>
+                                <p>Drag and drop your DOCX file here</p>
+                                <span>or</span>
+                            </div>
+
+                            <input id="editorFileInput" class="visually-hidden" type="file" name="file" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" aria-label="Browse DOCX file">
+                            <button type="button" id="browseEditorFile" class="browse-button">Browse Files</button>
+                        </div>
+
+                        <ul class="upload-details">
+                            <li><i class="bi bi-check-circle"></i> DOCX supported</li>
+                            <li><i class="bi bi-check-circle"></i> Secure upload handling</li>
+                            <li><i class="bi bi-check-circle"></i> Editable paragraphs and tables</li>
+                        </ul>
+                    </div>
+                </section>
+
+                <section id="editorWorkspace" class="editor-workspace hidden" aria-label="Document editor workspace">
+                    <aside class="editor-sidebar">
+                        <div class="panel-block">
+                            <h2>Formatting</h2>
+
+                            <div class="toolbar-row checkbox-row">
+                                <button type="button" class="toolbar-button" data-format="bold">
+                                    <i class="bi bi-type-bold"></i>
+                                    <span>Bold</span>
+                                </button>
+                                <button type="button" class="toolbar-button" data-format="italic">
+                                    <i class="bi bi-type-italic"></i>
+                                    <span>Italic</span>
+                                </button>
+                                <button type="button" class="toolbar-button" data-format="underline">
+                                    <i class="bi bi-type-underline"></i>
+                                    <span>Underline</span>
+                                </button>
+                            </div>
+
+                            <div class="toolbar-row stacked-row">
+                                <label>
+                                    <span>Font Size</span>
+                                    <select id="fontSizeSelect">
+                                        <option value="">Default</option>
+                                        <option value="10">10</option>
+                                        <option value="11">11</option>
+                                        <option value="12">12</option>
+                                        <option value="14">14</option>
+                                        <option value="16">16</option>
+                                        <option value="18">18</option>
+                                        <option value="22">22</option>
+                                        <option value="28">28</option>
+                                    </select>
+                                </label>
+
+                                <label>
+                                    <span>Font</span>
+                                    <select id="fontNameSelect">
+                                        <option value="">Default</option>
+                                        <option value="Calibri">Calibri</option>
+                                        <option value="Arial">Arial</option>
+                                        <option value="Times New Roman">Times New Roman</option>
+                                        <option value="Verdana">Verdana</option>
+                                    </select>
+                                </label>
+
+                                <label>
+                                    <span>Alignment</span>
+                                    <select id="alignmentSelect">
+                                        <option value="">Default</option>
+                                        <option value="left">Left</option>
+                                        <option value="center">Center</option>
+                                        <option value="right">Right</option>
+                                        <option value="justify">Justify</option>
+                                    </select>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="panel-block">
+                            <h2>Paragraph Actions</h2>
+
+                            <div class="toolbar-row action-row">
+                                <button type="button" id="addParagraphBtn" class="utility-button">Add Paragraph</button>
+                                <button type="button" id="deleteParagraphBtn" class="utility-button danger">Delete Selected</button>
+                            </div>
+                        </div>
+
+                        <div class="panel-block">
+                            <h2>Table Actions</h2>
+
+                            <div class="toolbar-row table-row">
+                                <button type="button" id="addTableRowBtn" class="utility-button">Add Row</button>
+                                <button type="button" id="deleteTableRowBtn" class="utility-button danger">Delete Row</button>
+                            </div>
+
+                            <div class="toolbar-row table-row">
+                                <button type="button" id="addTableColumnBtn" class="utility-button">Add Column</button>
+                                <button type="button" id="deleteTableColumnBtn" class="utility-button danger">Delete Column</button>
+                            </div>
+                        </div>
+
+                        <div class="panel-block">
+                            <h2>Replace Text</h2>
+
+                            <div class="replace-fields">
+                                <label>
+                                    <span>Find</span>
+                                    <input id="findTextInput" type="text" placeholder="Find text" />
+                                </label>
+
+                                <label>
+                                    <span>Replace with</span>
+                                    <input id="replaceTextInput" type="text" placeholder="Replacement" />
+                                </label>
+                            </div>
+
+                            <div class="toolbar-row action-row">
+                                <button type="button" id="replaceTextBtn" class="utility-button">Replace</button>
+                                <button type="button" id="replaceAllBtn" class="utility-button">Replace All</button>
+                            </div>
+                        </div>
+                    </aside>
+
+                    <div class="document-stage">
+                        <div class="document-page" id="documentPage" aria-live="polite"></div>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </body>
+</html>
