@@ -196,7 +196,7 @@ function handleDocumentUpload(file) {
         return;
     }
 
-    if (!file.name.toLowerCase().endswith('.docx')) {
+    if (!file.name.toLowerCase().endsWith('.docx')) {
         showNotification('Please upload a DOCX file.', 'error');
         return;
     }
