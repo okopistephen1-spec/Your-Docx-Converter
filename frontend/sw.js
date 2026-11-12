@@ -1,10 +1,11 @@
-const CACHE_NAME = 'your-docx-converter-v1';
+const CACHE_NAME = 'your-docx-converter-v2';
 const APP_SHELL = [
   './',
   './index.html',
   './converter.html',
   './editor.html',
   './manifest.json',
+  './config.js',
   './css/style.css',
   './css/editor.css',
   './js/converter.js',
@@ -12,6 +13,12 @@ const APP_SHELL = [
   './images/app-icon-192.png',
   './images/app-icon-512.png'
 ];
+
+const PAGE_ROUTE_MAP = {
+  '/': '/index.html',
+  '/converter': '/converter.html',
+  '/editor': '/editor.html'
+};
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -27,6 +34,29 @@ self.addEventListener('activate', (event) => {
   );
 });
 
+function cacheResponse(request, response) {
+  if (!response || !response.ok) {
+    return response;
+  }
+
+  const responseClone = response.clone();
+  return caches.open(CACHE_NAME)
+    .then((cache) => cache.put(request, responseClone))
+    .then(() => response)
+    .catch(() => response);
+}
+
+function getCachedPageForNavigation(request) {
+  const url = new URL(request.url);
+  const mappedPath = PAGE_ROUTE_MAP[url.pathname] || url.pathname;
+
+  if (mappedPath) {
+    return caches.match(mappedPath).then((cached) => cached || caches.match('./index.html'));
+  }
+
+  return caches.match(request).then((cached) => cached || caches.match('./index.html'));
+}
+
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') {
     return;
@@ -37,17 +67,26 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  const isPageNavigation = event.request.mode === 'navigate' || url.pathname.endsWith('.html') || url.pathname === '/';
+
+  if (isPageNavigation) {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => cacheResponse(event.request, response))
+        .catch(() => getCachedPageForNavigation(event.request))
+    );
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request).then((cached) => {
       if (cached) {
         return cached;
       }
 
-      return fetch(event.request).then((response) => {
-        const responseClone = response.clone();
-        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseClone));
-        return response;
-      }).catch(() => caches.match('./index.html'));
+      return fetch(event.request)
+        .then((response) => cacheResponse(event.request, response))
+        .catch(() => caches.match('./index.html'));
     })
   );
 });
