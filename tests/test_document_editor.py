@@ -1,82 +1,37 @@
 from docx import Document
-from services.document_editor import (
-    replace_text,
-    replace_paragraph,
-    save_document,
-    get_all_paragraphs
-)
+
+from services.document_editor import add_paragraph, get_all_paragraphs, replace_text, save_document
 
 
+def test_replace_text_updates_paragraphs_and_table_cells(tmp_path):
+    document = Document()
+    document.add_paragraph("Welcome to Your-Docx-Converter.")
 
-# TEST A: Text replacement and saving
+    table = document.add_table(rows=1, cols=2)
+    table.cell(0, 0).text = "Your-Docx"
+    table.cell(0, 1).text = "Converter"
 
-# Create a sample Word document
-document = Document()
+    file_path = tmp_path / "sample.docx"
+    save_document(document, file_path)
 
-document.add_paragraph(
-    "Welcome to Your-Docx-Converter."
-)
+    loaded_document = Document(file_path)
+    replacements = replace_text(loaded_document, "Your-Docx", "My-Docx")
 
-# Save the original document
-save_document(document, "sample.docx")
+    assert replacements >= 1
+    assert loaded_document.tables[0].cell(0, 0).text == "My-Docx"
+    assert "Welcome to My-Docx-Converter." in [paragraph.text for paragraph in loaded_document.paragraphs]
 
-# Open the saved document
-document = Document("sample.docx")
 
-# Replace existing text
-replace_text(
-    document,
-    "Your-Docx-Converter",
-    "My Document Editor"
-)
+def test_add_paragraph_keeps_document_content(tmp_path):
+    document = Document()
+    add_paragraph(document, "Alpha")
+    add_paragraph(document, "Beta")
 
-# Save the edited document
-save_document(document, "edited_document.docx")
+    file_path = tmp_path / "paragraphs.docx"
+    save_document(document, file_path)
 
-# Verify the edited document
-check_document = Document("edited_document.docx")
+    loaded_document = Document(file_path)
+    paragraph_texts = [paragraph.text for paragraph in loaded_document.paragraphs]
 
-for paragraph in check_document.paragraphs:
-    print(paragraph.text)
-
-    # TEST B: Retrieving paragraphs from tables
-
-document = Document()
-
-document.add_paragraph("This is outside the table.")
-
-table = document.add_table(rows=1, cols=2)
-
-table.cell(0, 0).text = "Your-Docx"
-table.cell(0, 1).text = "Converter"
-
-save_document(document, "table_test.docx")
-
-# Open the saved document
-document = Document("table_test.docx")
-
-# Retrieve all paragraphs
-paragraphs = get_all_paragraphs(document)
-
-# Display the retrieved text
-for paragraph in paragraphs:
-    print(paragraph.text)
-
-# TEST C: Replacing text inside a table
-
-document = Document("table_test.docx")
-
-replace_text(
-    document,
-    "Your-Docx",
-    "My-Docx"
-)
-
-save_document(document, "table_edited.docx")
-
-# Verify table replacement
-
-check_document = Document("table_edited.docx")
-
-for paragraph in get_all_paragraphs(check_document):
-    print(paragraph.text)
+    assert "Alpha" in paragraph_texts
+    assert "Beta" in paragraph_texts

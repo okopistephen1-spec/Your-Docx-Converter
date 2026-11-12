@@ -1,3 +1,6 @@
+const CONFIG = window.APP_CONFIG || { apiBaseUrl: window.location.origin || 'https://your-render-backend.onrender.com' };
+const API_BASE_URL = (CONFIG.apiBaseUrl || window.location.origin || '').replace(/\/$/, '');
+
 const emptyState = document.getElementById('emptyState');
 const editorWorkspace = document.getElementById('editorWorkspace');
 const editorFileInput = document.getElementById('editorFileInput');
@@ -30,6 +33,22 @@ const state = {
     selectedRowIndex: null,
     selectedCellIndex: null,
 };
+
+function apiUrl(path) {
+    return `${API_BASE_URL}${path}`;
+}
+
+function getSessionToken() {
+    return sessionStorage.getItem('docx_editor_token');
+}
+
+function authHeaders(extra = {}) {
+    const token = getSessionToken();
+    return {
+        ...extra,
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    };
+}
 
 function getSelectedParagraphIndex() {
     return state.selectedParagraphIndex;
@@ -161,9 +180,9 @@ function persistParagraphUpdate(index, text) {
         text: text,
     };
 
-    return fetchJson('/editor/action', {
+    return fetchJson(apiUrl('/api/editor/action'), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...authHeaders() },
         body: JSON.stringify(payload),
     }).then(() => {
         showStatus('Saved', 'success');
@@ -173,9 +192,9 @@ function persistParagraphUpdate(index, text) {
 }
 
 function persistTableCellUpdate(tableIndex, rowIndex, cellIndex, text) {
-    return fetchJson('/editor/action', {
+    return fetchJson(apiUrl('/api/editor/action'), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...authHeaders() },
         body: JSON.stringify({
             action: 'table',
             table_action: 'update_cell',
@@ -203,17 +222,22 @@ function handleDocumentUpload(file) {
 
     const formData = new FormData();
     formData.append('file', file);
-
     showStatus('Uploading...', 'neutral');
 
-    fetch('/editor/upload', {
+    fetch(apiUrl('/api/editor/upload'), {
         method: 'POST',
         body: formData,
+        headers: authHeaders(),
     }).then(async (response) => {
         const data = await response.json().catch(() => ({}));
         if (!response.ok) {
             throw new Error(data.error || 'Upload failed.');
         }
+
+        if (data.token) {
+            sessionStorage.setItem('docx_editor_token', data.token);
+        }
+
         setFilename(data.filename);
         setDocumentVisibility(true);
         renderDocument(data.document);
@@ -281,9 +305,9 @@ function applyCurrentFormatting() {
         ...getFormattingState(),
     };
 
-    fetchJson('/editor/action', {
+    fetchJson(apiUrl('/api/editor/action'), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...authHeaders() },
         body: JSON.stringify(nextPayload),
     }).then(() => {
         showStatus('Formatting saved', 'success');
@@ -301,9 +325,9 @@ function replaceCurrentText(replaceAll = false) {
         return;
     }
 
-    fetchJson('/editor/action', {
+    fetchJson(apiUrl('/api/editor/action'), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...authHeaders() },
         body: JSON.stringify({
             action: 'replace',
             find_text: findText,
@@ -312,7 +336,7 @@ function replaceCurrentText(replaceAll = false) {
         }),
     }).then((payload) => {
         showNotification(replaceAll ? `Replaced ${payload.count} matches` : `Replaced ${payload.count} match`, 'success');
-        return fetchJson('/editor/document');
+        return fetchJson(apiUrl('/api/editor/document'), { headers: authHeaders() });
     }).then((data) => {
         renderDocument(data.document);
         showStatus('Document updated', 'success');
@@ -322,9 +346,9 @@ function replaceCurrentText(replaceAll = false) {
 }
 
 function addParagraph() {
-    fetchJson('/editor/action', {
+    fetchJson(apiUrl('/api/editor/action'), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...authHeaders() },
         body: JSON.stringify({
             action: 'paragraph',
             paragraph_action: 'add',
@@ -345,9 +369,9 @@ function deleteSelectedParagraph() {
         return;
     }
 
-    fetchJson('/editor/action', {
+    fetchJson(apiUrl('/api/editor/action'), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...authHeaders() },
         body: JSON.stringify({
             action: 'paragraph',
             paragraph_action: 'delete',
@@ -365,9 +389,9 @@ function deleteSelectedParagraph() {
 function addTableRow() {
     const tableIndex = state.selectedTableIndex ?? 0;
 
-    fetchJson('/editor/action', {
+    fetchJson(apiUrl('/api/editor/action'), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...authHeaders() },
         body: JSON.stringify({
             action: 'table',
             table_action: 'add_row',
@@ -390,9 +414,9 @@ function deleteSelectedTableRow() {
         return;
     }
 
-    fetchJson('/editor/action', {
+    fetchJson(apiUrl('/api/editor/action'), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...authHeaders() },
         body: JSON.stringify({
             action: 'table',
             table_action: 'delete_row',
@@ -410,9 +434,9 @@ function deleteSelectedTableRow() {
 function addTableColumn() {
     const tableIndex = state.selectedTableIndex ?? 0;
 
-    fetchJson('/editor/action', {
+    fetchJson(apiUrl('/api/editor/action'), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...authHeaders() },
         body: JSON.stringify({
             action: 'table',
             table_action: 'add_column',
@@ -435,9 +459,9 @@ function deleteSelectedTableColumn() {
         return;
     }
 
-    fetchJson('/editor/action', {
+    fetchJson(apiUrl('/api/editor/action'), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...authHeaders() },
         body: JSON.stringify({
             action: 'table',
             table_action: 'delete_column',
@@ -453,8 +477,9 @@ function deleteSelectedTableColumn() {
 }
 
 function saveDocument() {
-    fetchJson('/editor/save', {
+    fetchJson(apiUrl('/api/editor/save'), {
         method: 'POST',
+        headers: authHeaders(),
     }).then((response) => {
         setFilename(response.filename);
         showNotification('Document saved', 'success');
@@ -468,7 +493,31 @@ function downloadDocument() {
         showNotification('Open a document before downloading.', 'error');
         return;
     }
-    window.location.href = '/editor/download';
+
+    fetch(apiUrl('/api/editor/download'), {
+        headers: authHeaders(),
+    }).then(async (response) => {
+        if (!response.ok) {
+            const data = await response.json().catch(() => ({}));
+            throw new Error(data.error || 'Download failed.');
+        }
+
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        const contentDisposition = response.headers.get('Content-Disposition') || '';
+        const filenameMatch = /filename\*=UTF-8''(.+)|filename="?(.+?)"?/.exec(contentDisposition);
+        const filename = decodeURIComponent((filenameMatch && (filenameMatch[1] || filenameMatch[2])) || state.filename || 'document.docx');
+
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    }).catch((error) => {
+        showNotification(error.message, 'error');
+    });
 }
 
 browseEditorFile.addEventListener('click', () => {
@@ -517,6 +566,17 @@ document.addEventListener('click', (event) => {
         applyFormatSelection(formatButton.dataset.format);
     }
 });
+
+saveDocumentBtn.addEventListener('click', saveDocument);
+downloadDocumentBtn.addEventListener('click', downloadDocument);
+replaceTextBtn.addEventListener('click', () => replaceCurrentText(false));
+replaceAllBtn.addEventListener('click', () => replaceCurrentText(true));
+addParagraphBtn.addEventListener('click', addParagraph);
+deleteParagraphBtn.addEventListener('click', deleteSelectedParagraph);
+addTableRowBtn.addEventListener('click', addTableRow);
+deleteTableRowBtn.addEventListener('click', deleteSelectedTableRow);
+addTableColumnBtn.addEventListener('click', addTableColumn);
+deleteTableColumnBtn.addEventListener('click', deleteSelectedTableColumn);
 
 saveDocumentBtn.addEventListener('click', saveDocument);
 downloadDocumentBtn.addEventListener('click', downloadDocument);

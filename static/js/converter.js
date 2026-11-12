@@ -1,3 +1,6 @@
+const CONFIG = window.APP_CONFIG || { apiBaseUrl: window.location.origin || 'https://your-render-backend.onrender.com' };
+const API_BASE_URL = (CONFIG.apiBaseUrl || window.location.origin || '').replace(/\/$/, '');
+
 const fileInput = document.getElementById('fileInput');
 const converterForm = document.getElementById('converterForm');
 const dropzone = document.getElementById('dropzone');
@@ -15,26 +18,30 @@ const quickPills = document.querySelectorAll('.quick-pill');
 
 const conversionMap = {
   'pdf-docx': {
-    route: '/convert/pdf-to-word',
+    route: '/api/convert/pdf-to-word',
     fileInputName: 'pdf_file',
     accept: '.pdf,application/pdf'
   },
   'pdf-png': {
-    route: '/convert/pdf-to-images',
+    route: '/api/convert/pdf-to-images',
     fileInputName: 'pdf_file',
     accept: '.pdf,application/pdf'
   },
   'docx-pdf': {
-    route: '/convert/word-to-pdf',
+    route: '/api/convert/word-to-pdf',
     fileInputName: 'word_file',
     accept: '.docx,.doc,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/msword'
   },
   'doc-pdf': {
-    route: '/convert/word-to-pdf',
+    route: '/api/convert/word-to-pdf',
     fileInputName: 'word_file',
     accept: '.docx,.doc,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/msword'
   }
 };
+
+function apiUrl(path) {
+  return `${API_BASE_URL}${path}`;
+}
 
 function formatBytes(bytes) {
   if (!bytes) {
@@ -71,7 +78,7 @@ function syncConversionSelection() {
     return;
   }
 
-  converterForm.action = config.route;
+  converterForm.action = apiUrl(config.route);
   fileInput.name = config.fileInputName;
   fileInput.accept = config.accept;
 
@@ -109,6 +116,23 @@ function handleFileSelection(file) {
   selectedSize.textContent = formatBytes(file.size);
   selectedFile.hidden = false;
   updateSubmitState();
+}
+
+function downloadConvertedFile(response, fallbackName) {
+  const contentDisposition = response.headers.get('Content-Disposition') || '';
+  const filenameMatch = /filename\*=UTF-8''(.+)|filename="?(.+?)"?/.exec(contentDisposition);
+  const suggestedName = decodeURIComponent((filenameMatch && (filenameMatch[1] || filenameMatch[2])) || fallbackName || 'converted-file');
+
+  return response.blob().then((blob) => {
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = suggestedName;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  });
 }
 
 browseButton.addEventListener('click', () => fileInput.click());
@@ -172,13 +196,40 @@ quickPills.forEach((pill) => {
   });
 });
 
-converterForm.addEventListener('submit', (event) => {
+converterForm.addEventListener('submit', async (event) => {
+  event.preventDefault();
+
   if (!fileInput.files || !fileInput.files[0]) {
-    event.preventDefault();
     return;
   }
 
   syncConversionSelection();
+
+  const formData = new FormData();
+  formData.append(fileInput.name, fileInput.files[0]);
+  const route = converterForm.action || apiUrl(conversionMap[`${convertFrom.value}-${convertTo.value}`].route);
+  submitButton.disabled = true;
+  submitButton.textContent = 'Converting...';
+
+  try {
+    const response = await fetch(route, {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const payload = await response.text();
+      throw new Error(payload || 'Conversion failed.');
+    }
+
+    await downloadConvertedFile(response, `${selectedName.textContent || 'document'}`);
+    submitButton.textContent = 'Convert Document';
+    submitButton.disabled = false;
+  } catch (error) {
+    submitButton.textContent = 'Convert Document';
+    submitButton.disabled = false;
+    window.alert(error.message || 'Conversion failed. Please try again.');
+  }
 });
 
 syncConversionSelection();

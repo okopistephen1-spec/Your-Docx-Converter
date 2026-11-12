@@ -1,0 +1,9 @@
+{
+  "cleanUrls": true,
+  "routes": [
+    { "src": "/", "dest": "/index.html" },
+    { "src": "/converter", "dest": "/converter.html" },
+    { "src": "/editor", "dest": "/editor.html" },
+    { "src": "/(.*)", "dest": "/$1" }
+  ]
+}
