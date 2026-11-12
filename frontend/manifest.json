@@ -1,8 +1,8 @@
 {
   "name": "Your-Docx-Converter",
   "short_name": "Your Docx",
-  "start_url": "./",
-  "scope": "./",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#F6F3FF",
