@@ -12,6 +12,8 @@ from docx.shared import Pt
 from flask import Flask, jsonify, render_template, request, send_file, session
 from werkzeug.utils import secure_filename
 
+from database import database_status, init_database
+from services.google_auth import google_auth_bp
 from services.document_editor import (
     add_paragraph,
     add_table_column,
@@ -31,11 +33,25 @@ from services.pdf_to_word import convert_pdf_to_word
 from services.word_to_pdf import convert_word_to_pdf
 
 app = Flask(__name__)
+app.register_blueprint(google_auth_bp)
+
+
+def resolve_secret_key():
+    environment = os.environ.get("APP_ENV", "development").lower()
+    secret_key = os.environ.get("SECRET_KEY")
+    if environment == "production":
+        if not secret_key or secret_key == "docx-converter-dev-secret":
+            raise RuntimeError("Production SECRET_KEY is not configured.")
+        return secret_key
+    return secret_key or "docx-converter-dev-secret"
+
 
 app.config["MAX_CONTENT_LENGTH"] = 15 * 1024 * 1024
-app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "docx-converter-dev-secret")
-app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
-app.config["SESSION_COOKIE_SECURE"] = os.environ.get("SESSION_COOKIE_SECURE", "False").lower() in {"1", "true", "yes"}
+app.config["SECRET_KEY"] = resolve_secret_key()
+app.config["SESSION_COOKIE_SAMESITE"] = "None"
+app.config["SESSION_COOKIE_SECURE"] = os.environ.get("SESSION_COOKIE_SECURE", "true" if os.environ.get("APP_ENV", "development").lower() == "production" else "false").lower() in {"1", "true", "yes"}
+
+init_database(app)
 
 BASE_DIR = Path(__file__).resolve().parent
 UPLOAD_FOLDER = BASE_DIR / "uploads"
@@ -43,6 +59,11 @@ CONVERTED_FOLDER = BASE_DIR / "converted"
 EDITOR_FOLDER = UPLOAD_FOLDER / "editor"
 SESSION_STORE = UPLOAD_FOLDER / "sessions"
 SESSION_TTL_SECONDS = int(os.environ.get("EDITOR_SESSION_TTL_SECONDS", str(60 * 60 * 24)))
+
+with app.app_context():
+    app.config["DATABASE_STATUS"] = database_status()
+    if not app.config.get("DATABASE_CONFIGURED"):
+        app.logger.warning("Database not configured: set DATABASE_URL to enable database-backed features.")
 
 for folder in (UPLOAD_FOLDER, CONVERTED_FOLDER, EDITOR_FOLDER, SESSION_STORE):
     folder.mkdir(parents=True, exist_ok=True)
@@ -58,7 +79,6 @@ class EditorSessionError(RuntimeError):
 def _allowed_origins():
     configured = []
     for entry in (
-        os.environ.get("VERCEL_FRONTEND_URL"),
         os.environ.get("FRONTEND_ORIGIN"),
         os.environ.get("CORS_ALLOWED_ORIGINS"),
     ):
@@ -67,6 +87,7 @@ def _allowed_origins():
         configured.extend([part.strip() for part in entry.split(",") if part.strip()])
 
     defaults = [
+        "https://your-docx-converter-frontend.vercel.app",
         "http://localhost:3000",
         "http://localhost:4173",
         "http://127.0.0.1:3000",
@@ -78,10 +99,7 @@ def _allowed_origins():
 def _origin_allowed(origin):
     if not origin:
         return True
-    allowed = _allowed_origins()
-    if origin in allowed:
-        return True
-    return any(fnmatch.fnmatch(origin, pattern) for pattern in ["https://*.vercel.app", "https://*.vercel.app/*"] + [f"{item}/*" for item in allowed if item.startswith("https://")])
+    return origin in _allowed_origins()
 
 
 @app.after_request
@@ -701,6 +719,12 @@ def api_word_to_pdf():
 @app.route("/api/health")
 def api_health():
     return jsonify({"status": "ok"})
+
+
+@app.route("/api/db/health")
+def api_db_health():
+    status = database_status()
+    return jsonify(status)
 
 
 if __name__ == "__main__":

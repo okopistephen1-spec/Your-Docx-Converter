@@ -6,3 +6,8 @@ python-docx==1.2.0
 Pillow==13.0.0
 gunicorn==27.0.0
 Flask-Cors==5.0.0
+Flask-SQLAlchemy==3.1.1
+Flask-Migrate==4.0.7
+psycopg[binary]==3.2.1
+google-auth==2.40.3
+requests==2.32.3
