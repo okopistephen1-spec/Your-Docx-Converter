@@ -71,15 +71,22 @@
         </div>
 
         <script>
-            window.APP_CONFIG = window.APP_CONFIG || {
-                apiBaseUrl: "https://your-docx-converter.onrender.com",
-                googleClientId: ""
-            };
-
-            const apiBaseUrl = (window.APP_CONFIG && window.APP_CONFIG.apiBaseUrl ? window.APP_CONFIG.apiBaseUrl.replace(/\/$/, '') : window.location.origin);
-            const googleClientId = (window.APP_CONFIG && window.APP_CONFIG.googleClientId) || '';
             const authCookieName = 'docx_auth';
             const csrfCookieName = 'docx_csrf';
+
+            function getAppConfig() {
+                return window.APP_CONFIG && typeof window.APP_CONFIG === 'object' ? window.APP_CONFIG : {};
+            }
+
+            function getApiBaseUrl() {
+                const appConfig = getAppConfig();
+                return (appConfig.apiBaseUrl ? appConfig.apiBaseUrl.replace(/\/$/, '') : window.location.origin);
+            }
+
+            function getGoogleClientId() {
+                const appConfig = getAppConfig();
+                return appConfig.googleClientId || '';
+            }
 
             function getCookie(name) {
                 const match = document.cookie.match(new RegExp('(?:^|; )' + name.replace(/([.$?*|{}()[\]\\/+^])/g, '\\$1') + '=([^;]*)'));
@@ -124,6 +131,7 @@
             }
 
             async function fetchCurrentUser() {
+                const apiBaseUrl = getApiBaseUrl();
                 const authToken = getCookie(authCookieName);
                 if (!authToken) {
                     updateUserUI(null);
@@ -155,6 +163,7 @@
             }
 
             async function exchangeGoogleToken(credential) {
+                const apiBaseUrl = getApiBaseUrl();
                 const response = await fetch(`${apiBaseUrl}/api/auth/google`, {
                     method: 'POST',
                     credentials: 'include',
@@ -187,6 +196,7 @@
             }
 
             async function logout() {
+                const apiBaseUrl = getApiBaseUrl();
                 const authToken = getCookie(authCookieName);
                 const csrf = getCookie(csrfCookieName);
                 if (!authToken) {
@@ -216,6 +226,7 @@
             }
 
             function initializeGoogleSignIn() {
+                const googleClientId = getGoogleClientId();
                 if (!googleClientId) {
                     setStatus('Google Sign-In is not configured. Set window.APP_CONFIG.googleClientId before enabling auth.', true);
                     return;
@@ -246,18 +257,20 @@
 
             document.getElementById('logoutButton').addEventListener('click', logout);
 
-            if (window.google && window.google.accounts && window.google.accounts.id) {
-                initializeGoogleSignIn();
-            } else {
-                const waitForGoogle = setInterval(() => {
-                    if (window.google && window.google.accounts && window.google.accounts.id) {
-                        clearInterval(waitForGoogle);
-                        initializeGoogleSignIn();
-                    }
-                }, 200);
-            }
+            document.addEventListener('DOMContentLoaded', () => {
+                if (window.google && window.google.accounts && window.google.accounts.id) {
+                    initializeGoogleSignIn();
+                } else {
+                    const waitForGoogle = setInterval(() => {
+                        if (window.google && window.google.accounts && window.google.accounts.id) {
+                            clearInterval(waitForGoogle);
+                            initializeGoogleSignIn();
+                        }
+                    }, 200);
+                }
 
-            fetchCurrentUser();
+                fetchCurrentUser();
+            });
         </script>
     </body>
 </html>
