@@ -4,6 +4,7 @@
     { "src": "/", "dest": "/index.html" },
     { "src": "/converter", "dest": "/converter.html" },
     { "src": "/editor", "dest": "/editor.html" },
+    { "src": "/profile", "dest": "/profile.html" },
     { "src": "/(.*)", "dest": "/$1" }
   ]
 }
