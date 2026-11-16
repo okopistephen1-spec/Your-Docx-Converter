@@ -10,6 +10,7 @@ from pathlib import Path
 from docx import Document
 from docx.shared import Pt
 from flask import Flask, jsonify, render_template, request, send_file, session
+from werkzeug.test import EnvironBuilder
 from werkzeug.utils import secure_filename
 
 from database import database_status, init_database
@@ -32,6 +33,24 @@ from services.pdf_to_image import convert_pdf_to_images
 from services.pdf_to_word import convert_pdf_to_word
 from services.word_to_pdf import convert_word_to_pdf
 
+_environ_builder_init = EnvironBuilder.__init__
+
+
+def _compat_environ_builder_init(self, *args, **kwargs):
+    cookies = kwargs.pop("cookies", None)
+    if cookies:
+        headers = dict(kwargs.get("headers") or {})
+        existing_cookie = headers.get("Cookie") or headers.get("cookie") or ""
+        cookie_pairs = [f"{key}={value}" for key, value in cookies.items()]
+        combined = "; ".join(filter(None, [existing_cookie, *cookie_pairs]))
+        if combined:
+            headers["Cookie"] = combined
+        kwargs["headers"] = headers
+    return _environ_builder_init(self, *args, **kwargs)
+
+
+EnvironBuilder.__init__ = _compat_environ_builder_init
+
 app = Flask(__name__)
 app.register_blueprint(google_auth_bp)
 
@@ -48,6 +67,7 @@ def resolve_secret_key():
 
 app.config["MAX_CONTENT_LENGTH"] = 15 * 1024 * 1024
 app.config["SECRET_KEY"] = resolve_secret_key()
+app.config["GOOGLE_CLIENT_ID"] = os.environ.get("GOOGLE_CLIENT_ID")
 app.config["SESSION_COOKIE_SAMESITE"] = "None"
 app.config["SESSION_COOKIE_SECURE"] = os.environ.get("SESSION_COOKIE_SECURE", "true" if os.environ.get("APP_ENV", "development").lower() == "production" else "false").lower() in {"1", "true", "yes"}
 
@@ -108,7 +128,7 @@ def add_cors_headers(response):
     if origin and _origin_allowed(origin):
         response.headers["Access-Control-Allow-Origin"] = origin
         response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
-        response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, X-Requested-With"
+        response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, X-Requested-With, X-CSRF-Token"
         response.headers["Access-Control-Allow-Credentials"] = "true"
         response.headers["Vary"] = "Origin"
     if request.method == "OPTIONS":
@@ -255,6 +275,11 @@ def _render_editor_payload(document_path, filename):
 @app.route("/")
 def home():
     return render_template("index.html")
+
+
+@app.route("/profile")
+def profile():
+    return render_template("profile.html")
 
 
 @app.route("/converter")

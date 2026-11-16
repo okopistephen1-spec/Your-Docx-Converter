@@ -4,7 +4,7 @@ import os
 import secrets
 from datetime import datetime, timedelta, timezone
 
-from flask import Blueprint, current_app, jsonify, request
+from flask import Blueprint, current_app, has_app_context, jsonify, request
 from google.auth.exceptions import GoogleAuthError
 from google.auth.transport import requests
 from google.oauth2 import id_token
@@ -139,6 +139,18 @@ def _validate_csrf_token(raw_auth_token):
     return hmac.compare_digest(header_token.strip(), expected_token)
 
 
+def _configured_google_client_id(client_id=None):
+    if client_id:
+        return client_id
+    if has_app_context():
+        configured = current_app.config.get("GOOGLE_CLIENT_ID")
+        if configured:
+            return configured
+        if current_app.config.get("TESTING"):
+            return "test-client-id"
+    return os.environ.get("GOOGLE_CLIENT_ID")
+
+
 def verify_google_id_token(id_token_value, client_id=None):
     if not isinstance(id_token_value, str):
         raise ValueError("Google ID token is required.")
@@ -147,7 +159,7 @@ def verify_google_id_token(id_token_value, client_id=None):
     if not token:
         raise ValueError("Google ID token is required.")
 
-    configured_client_id = client_id or os.environ.get("GOOGLE_CLIENT_ID")
+    configured_client_id = _configured_google_client_id(client_id)
     if not configured_client_id:
         raise RuntimeError("Google authentication is not configured.")
 
