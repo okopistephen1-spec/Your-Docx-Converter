@@ -30,13 +30,13 @@ def normalize_database_url(database_url):
 
 def init_database(app):
     database_url = os.environ.get("DATABASE_URL")
+
     if not database_url:
-        app.config["DATABASE_CONFIGURED"] = False
-        app.config["DATABASE_STATUS"] = "Database not configured. Set DATABASE_URL to enable database-backed features."
-        app.logger.warning("Database not configured: set DATABASE_URL to enable database-backed features.")
-        return False
+        database_url = "sqlite:///your_docx_converter.db"
+        app.logger.info("Using local SQLite database.")
 
     normalized_url = normalize_database_url(database_url)
+
     app.config["SQLALCHEMY_DATABASE_URI"] = normalized_url
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {"pool_pre_ping": True}
@@ -44,6 +44,7 @@ def init_database(app):
 
     db.init_app(app)
     migrate.init_app(app, db)
+
     app.config["DATABASE_STATUS"] = "Database configured."
     return True
 

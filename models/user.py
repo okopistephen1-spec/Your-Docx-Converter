@@ -51,18 +51,41 @@ class User(db.Model):
     __tablename__ = "users"
 
     id = db.Column(UUIDType, primary_key=True, default=uuid.uuid4, nullable=False)
-    google_sub = db.Column(db.String(255), unique=True, nullable=False, index=True)
+
+    # Authentication identities
+    google_sub = db.Column(
+        db.String(255),
+        unique=True,
+        nullable=True,
+        index=True
+    )
+
+    password_hash = db.Column(db.String(255), nullable=True)
+
+    # Basic account information
     email = db.Column(db.String(255), unique=True, nullable=False, index=True)
     name = db.Column(db.String(255), nullable=False)
     given_name = db.Column(db.String(255), nullable=True)
+
+    # Profile information
     picture_url = db.Column(db.String(512), nullable=True)
     avatar_storage_key = db.Column(db.String(512), nullable=True)
+
+    # Account verification
+    email_verified = db.Column(db.Boolean, default=False, nullable=False)
+
+    # Account timestamps
     created_at = db.Column(UTCDateTime, default=utc_now, nullable=False)
     updated_at = db.Column(UTCDateTime, default=utc_now, onupdate=utc_now, nullable=False)
     last_login_at = db.Column(UTCDateTime, nullable=True)
+
     welcome_email_sent = db.Column(db.Boolean, default=False, nullable=False)
 
-    sessions = db.relationship("UserSession", back_populates="user", cascade="all, delete-orphan")
+    sessions = db.relationship(
+        "UserSession",
+        back_populates="user",
+        cascade="all, delete-orphan"
+    )
 
     @validates("email")
     def normalize_email(self, key, value):
